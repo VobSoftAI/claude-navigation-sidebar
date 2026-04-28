@@ -266,7 +266,7 @@
     sidebarRoot.id = 'crpb-sidebar';
     sidebarRoot.innerHTML = `
       <div class="crpb-header">
-        <span class="crpb-title">Bookmarks</span>
+        <span class="crpb-title">${SITE === 'claude' ? 'Reply tags' : 'Bookmarks'}</span>
         <button class="crpb-toggle" aria-label="Collapse"></button>
       </div>
       <ul class="crpb-list" role="list"></ul>
