@@ -30,36 +30,16 @@ not a saved index.
   plus your typed reply). If the sent turn isn't available yet (e.g., the
   reply hasn't been submitted), the button falls back to scrolling to the
   bottom of the assistant message you were reading.
+- **Click `×`** on any entry to remove it from the sidebar.
 
-## Updating the selectors when claude.ai changes
+## If it stops working
 
 The DOM at claude.ai is not a stable contract. When the site ships a UI
-update, one or more of the selectors in `content.js` may stop matching.
-The sidebar will appear but won't capture clicks or won't link reply turns.
+update, the extension may stop capturing bookmarks or linking reply turns.
 
-To repair:
-
-1. Open a claude.ai chat with the extension loaded.
-2. Right-click the element that broke (the reply button or an assistant
-   message) and choose Inspect.
-3. Find a stable-looking attribute on the element — `aria-label`, a
-   `data-testid`, or a distinctive class fragment.
-4. Open `content.js` and update the corresponding entry in the `SEL` object
-   at the top of the file. Each entry is a list of selectors; the first
-   one that matches is used, so you can leave older patterns in place as
-   fallbacks.
-5. Reload the extension in `chrome://extensions` (the refresh icon on the
-   extension's card), then reload the claude.ai tab.
-
-The two selectors that matter:
-
-- `REPLY_BUTTON` — the floating "Reply" button that appears when you've
-  selected text inside an assistant message. The current stable hook is the
-  parent container `[data-selection-tooltip="true"]`; we select the `button`
-  inside it.
-- `ASSISTANT_TURN` — a single assistant message container. Used to identify
-  which turn contained the highlight and to compute the scroll target.
-  Current hook: `[data-test-render-count]`.
+If that happens, please [open an issue](https://github.com/VobSoftAI/claude-navigation-sidebar/issues)
+and describe what's broken. Include the date so it can be correlated with
+a claude.ai deploy.
 
 ## Known limitations
 
