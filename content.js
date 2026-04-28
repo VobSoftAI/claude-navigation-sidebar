@@ -140,6 +140,7 @@
       e.stopPropagation();
       if (lastSelection && Date.now() - lastSelection.timestamp <= 5000) {
         createBookmark(lastSelection);
+        lastSelection = null;
       }
       hideFloatBtn();
     });
