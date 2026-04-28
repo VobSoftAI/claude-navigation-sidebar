@@ -265,7 +265,7 @@
     sidebarRoot.id = 'crpb-sidebar';
     sidebarRoot.innerHTML = `
       <div class="crpb-header">
-        <span class="crpb-title">Reply trail</span>
+        <span class="crpb-title">Bookmarks</span>
         <button class="crpb-toggle" aria-label="Collapse"></button>
       </div>
       <ul class="crpb-list" role="list"></ul>
@@ -300,13 +300,6 @@
       titleBtn.title = 'Jump to where you were reading';
       titleBtn.addEventListener('click', () => jumpToA(bm));
 
-      const bBtn = document.createElement('button');
-      bBtn.className = 'crpb-b-btn';
-      bBtn.setAttribute('aria-label', 'Jump to end of this assistant response');
-      bBtn.title = 'Jump to end of this assistant response';
-      bBtn.textContent = '↓';
-      bBtn.addEventListener('click', () => jumpToB(bm));
-
       const removeBtn = document.createElement('button');
       removeBtn.className = 'crpb-remove-btn';
       removeBtn.setAttribute('aria-label', 'Remove bookmark');
@@ -319,7 +312,15 @@
       });
 
       li.appendChild(titleBtn);
-      li.appendChild(bBtn);
+      if (SITE === 'claude') {
+        const bBtn = document.createElement('button');
+        bBtn.className = 'crpb-b-btn';
+        bBtn.setAttribute('aria-label', 'Jump to end of this assistant response');
+        bBtn.title = 'Jump to end of this assistant response';
+        bBtn.textContent = '↓';
+        bBtn.addEventListener('click', () => jumpToB(bm));
+        li.appendChild(bBtn);
+      }
       li.appendChild(removeBtn);
       list.appendChild(li);
     }
