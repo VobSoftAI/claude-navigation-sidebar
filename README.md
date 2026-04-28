@@ -18,10 +18,17 @@ not a saved index.
 3. Click "Load unpacked" and select this directory.
 4. Open or reload a claude.ai chat. The sidebar appears on the right edge.
 
+Works on both **claude.ai** and **gemini.google.com**.
+
 ## How it works
 
-- **Select text** inside any assistant message, then click the floating
-  **Reply** button that appears.
+**On claude.ai:** Select text inside any assistant message, then click the
+floating **Reply** button that appears.
+
+**On Gemini:** Select text inside any model response. A small **Bookmark**
+button appears just above the selection — click it to add the entry.
+
+For both sites:
 - A bookmark entry is added to the sidebar immediately. The bookmark title
   is the selected text (truncated to 60 characters).
 - **Click the title** to scroll back to the exact paragraph you were reading.

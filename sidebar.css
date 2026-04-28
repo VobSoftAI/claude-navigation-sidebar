@@ -174,6 +174,28 @@
   color: #c0392b;
 }
 
+/* Gemini: floating bookmark button that appears on text selection */
+.crpb-float-btn {
+  position: fixed;
+  display: none;
+  padding: 5px 11px;
+  background: #2a2722;
+  color: #f5f0ea;
+  border: none;
+  border-radius: 5px;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+
+.crpb-float-btn.crpb-float-visible { display: block; }
+
+.crpb-float-btn:hover { background: #3d3730; }
+
 /* Flash overlay when scrolling back to anchor A */
 .crpb-flash {
   position: absolute;
@@ -208,4 +230,6 @@
   .crpb-remove-btn { border-left-color: rgba(255, 255, 255, 0.05); color: #6a625a; }
   .crpb-remove-btn:hover { background: rgba(200, 60, 60, 0.15); color: #e05c4a; }
   .crpb-flash { background: rgba(255, 220, 100, 0.25); }
+  .crpb-float-btn { background: #e8e3db; color: #2a2722; }
+  .crpb-float-btn:hover { background: #d4cec7; }
 }

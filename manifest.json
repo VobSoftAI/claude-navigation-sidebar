@@ -5,7 +5,7 @@
   "description": "Sidebar that bookmarks your reading position in Claude.ai conversations so you can jump back to where you were.",
   "content_scripts": [
     {
-      "matches": ["https://claude.ai/*"],
+      "matches": ["https://claude.ai/*", "https://gemini.google.com/*"],
       "js": ["content.js"],
       "css": ["sidebar.css"],
       "run_at": "document_idle"
