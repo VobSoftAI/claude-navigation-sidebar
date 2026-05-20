@@ -232,6 +232,17 @@
       sidecarBtnContainer.appendChild(bmBtn);
     }
 
+    const tagBtn = document.createElement('button');
+    tagBtn.className = 'crpb-sidecar-action';
+    tagBtn.textContent = 'Tag';
+    tagBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!lastSelection || Date.now() - lastSelection.timestamp > 10000) return;
+      insertAtCursor('<,' + slugify(lastSelection.text) + '>');
+      hideSidecarBtns();
+    });
+    sidecarBtnContainer.appendChild(tagBtn);
+
     for (const { label, prefix } of SIDECAR_PROMPTS) {
       const btn = document.createElement('button');
       btn.className = 'crpb-sidecar-action';
@@ -269,9 +280,9 @@
 
   function _positionNextToTooltip(container, tooltip) {
     const rect = tooltip.getBoundingClientRect();
-    const left = Math.min(rect.right + 6, window.innerWidth - 200 - 8);
-    container.style.top  = rect.top + 'px';
-    container.style.left = left + 'px';
+    // Place below the tooltip so it never overlaps the Reply button.
+    container.style.top  = (rect.bottom + 4) + 'px';
+    container.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 240)) + 'px';
     container.classList.add('crpb-sidecar-visible');
   }
 
@@ -377,6 +388,22 @@
     input.focus();
     document.execCommand('selectAll', false, null);
     document.execCommand('insertText', false, text);
+  }
+
+  function insertAtCursor(text) {
+    const input = findInput();
+    if (!input) return;
+    input.focus();
+    document.execCommand('insertText', false, text);
+  }
+
+  function slugify(text) {
+    return text.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .slice(0, 60);
   }
 
   chrome.runtime.onMessage.addListener((msg) => {
