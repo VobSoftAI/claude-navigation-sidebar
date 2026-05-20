@@ -247,7 +247,7 @@
 
     for (const { label, prefix } of SIDECAR_PROMPTS) {
       const btn = document.createElement('button');
-      btn.className = 'crpb-sidecar-action';
+      btn.className = 'crpb-sidecar-action crpb-sidecar-dispatch';
       btn.textContent = label;
       btn.dataset.prefix = prefix;
       btn.addEventListener('click', (e) => {
@@ -268,8 +268,12 @@
   }
 
   function showSidecarBtns(range) {
-    if (isReceiver) return;
     const container = ensureSidecarBtns();
+    // Dispatch buttons (Explain/Define/Search) are pointless on a receiver tab
+    // — they'd just send to themselves. Hide them; Bookmark and Tag still work.
+    container.querySelectorAll('.crpb-sidecar-dispatch').forEach(btn => {
+      btn.style.display = isReceiver ? 'none' : '';
+    });
     if (SITE === 'claude') {
       _positionSidecarVsTooltip(container, range);
     } else {
