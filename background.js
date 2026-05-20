@@ -47,6 +47,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         chrome.tabs.sendMessage(tabId, {
           action: 'sidecar-receive',
           text: msg.text,
+          submit: msg.submit !== false,
         }).catch(() => {
           // Tab may have navigated away — remove it.
           unregisterReceiver(tabId);

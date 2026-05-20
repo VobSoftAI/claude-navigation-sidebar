@@ -238,7 +238,9 @@
     tagBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (!lastSelection || Date.now() - lastSelection.timestamp > 10000) return;
-      insertAtCursor('<,' + slugify(lastSelection.text) + '>');
+      const tag = '<,' + slugify(lastSelection.text) + '>';
+      insertAtCursor(tag);
+      chrome.runtime.sendMessage({ action: 'sidecar-send', text: tag, submit: false });
       hideSidecarBtns();
     });
     sidecarBtnContainer.appendChild(tagBtn);
@@ -408,7 +410,11 @@
 
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.action === 'sidecar-receive') {
-      injectAndSubmit(msg.text);
+      if (msg.submit === false) {
+        injectAndFill(msg.text);
+      } else {
+        injectAndSubmit(msg.text);
+      }
     }
   });
 
