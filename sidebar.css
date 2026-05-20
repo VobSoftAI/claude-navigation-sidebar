@@ -32,7 +32,8 @@
 #crpb-sidebar.crpb-collapsed .crpb-list,
 #crpb-sidebar.crpb-collapsed .crpb-empty,
 #crpb-sidebar.crpb-collapsed .crpb-title,
-#crpb-sidebar.crpb-collapsed .crpb-clear-btn {
+#crpb-sidebar.crpb-collapsed .crpb-clear-btn,
+#crpb-sidebar.crpb-collapsed .crpb-sidecar-toggle {
   display: none;
 }
 
