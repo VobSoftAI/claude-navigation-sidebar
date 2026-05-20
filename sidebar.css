@@ -196,27 +196,47 @@
   color: #c0392b;
 }
 
-/* Gemini: floating bookmark button that appears on text selection */
-.crpb-float-btn {
+/* Gemini: floating [Bookmark] [Reply] row on text selection */
+.crpb-float-row {
   position: fixed;
   display: none;
-  padding: 5px 11px;
+  z-index: 10000;
+  gap: 4px;
+  background: rgba(252, 250, 245, 0.97);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-radius: 6px;
+  padding: 4px 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(6px);
+}
+
+.crpb-float-row.crpb-float-visible { display: flex; }
+
+.crpb-float-btn {
   background: #2a2722;
   color: #f5f0ea;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 12px;
   cursor: pointer;
-  z-index: 10000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  padding: 3px 9px;
   white-space: nowrap;
   transition: background 0.1s;
 }
 
-.crpb-float-btn.crpb-float-visible { display: block; }
-
 .crpb-float-btn:hover { background: #3d3730; }
+
+/* Bookmark type icon in sidebar list */
+.crpb-bm-icon {
+  font-size: 9px;
+  margin-right: 4px;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.crpb-bm-icon-mark  { color: #4a7c59; }
+.crpb-bm-icon-reply { color: #4a6b9e; }
 
 /* Flash overlay when scrolling back to anchor A */
 .crpb-flash {
@@ -338,6 +358,7 @@
   .crpb-remove-btn { border-left-color: rgba(255, 255, 255, 0.05); color: #6a625a; }
   .crpb-remove-btn:hover { background: rgba(200, 60, 60, 0.15); color: #e05c4a; }
   .crpb-flash { background: rgba(255, 220, 100, 0.25); }
+  .crpb-float-row { background: rgba(38, 35, 32, 0.97); border-color: rgba(255,255,255,0.08); }
   .crpb-float-btn { background: #e8e3db; color: #2a2722; }
   .crpb-float-btn:hover { background: #d4cec7; }
 }

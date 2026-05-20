@@ -122,7 +122,7 @@
       });
       if (!isReplyButton) return;
       if (!lastSelection || Date.now() - lastSelection.timestamp > 5000) return;
-      createBookmark(lastSelection);
+      createBookmark(lastSelection, 'reply');
     }, true);
   }
 
@@ -130,33 +130,53 @@
   // GEMINI: injected floating bookmark button
   // ────────────────────────────────────────────────────────────────────
 
-  let floatBtn = null;
+  let floatBtn = null;  // container div holding Bookmark + Reply buttons
 
   function ensureFloatBtn() {
     if (floatBtn) return floatBtn;
-    floatBtn = document.createElement('button');
-    floatBtn.className = 'crpb-float-btn';
-    floatBtn.textContent = 'Bookmark';
-    floatBtn.setAttribute('aria-label', 'Bookmark this position');
-    document.body.appendChild(floatBtn);
-    floatBtn.addEventListener('click', (e) => {
+    floatBtn = document.createElement('div');
+    floatBtn.className = 'crpb-float-row';
+
+    const bmBtn = document.createElement('button');
+    bmBtn.className = 'crpb-float-btn';
+    bmBtn.textContent = 'Bookmark';
+    bmBtn.setAttribute('aria-label', 'Bookmark this position');
+    bmBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (lastSelection && Date.now() - lastSelection.timestamp <= 5000) {
-        createBookmark(lastSelection);
+        createBookmark(lastSelection, 'bookmark');
         lastSelection = null;
       }
       hideFloatBtn();
     });
+
+    const replyBtn = document.createElement('button');
+    replyBtn.className = 'crpb-float-btn';
+    replyBtn.textContent = 'Reply';
+    replyBtn.setAttribute('aria-label', 'Bookmark and copy to input');
+    replyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (lastSelection && Date.now() - lastSelection.timestamp <= 5000) {
+        createBookmark(lastSelection, 'reply');
+        injectAndFill(lastSelection.text);
+        lastSelection = null;
+      }
+      hideFloatBtn();
+    });
+
+    floatBtn.appendChild(bmBtn);
+    floatBtn.appendChild(replyBtn);
+    document.body.appendChild(floatBtn);
     return floatBtn;
   }
 
   function showFloatBtn(range) {
-    const btn = ensureFloatBtn();
+    const row = ensureFloatBtn();
     const rect = range.getBoundingClientRect();
-    const btnW = 84;
-    btn.style.top  = Math.max(8, rect.top - 38) + 'px';
-    btn.style.left = Math.min(rect.right - btnW, window.innerWidth - btnW - 8) + 'px';
-    btn.classList.add('crpb-float-visible');
+    const rowW = 160;
+    row.style.top  = Math.max(8, rect.top - 38) + 'px';
+    row.style.left = Math.min(rect.right - rowW, window.innerWidth - rowW - 8) + 'px';
+    row.classList.add('crpb-float-visible');
   }
 
   function hideFloatBtn() {
@@ -198,6 +218,19 @@
     if (sidecarBtnContainer) return sidecarBtnContainer;
     sidecarBtnContainer = document.createElement('div');
     sidecarBtnContainer.className = 'crpb-sidecar-btns';
+
+    if (SITE === 'claude') {
+      const bmBtn = document.createElement('button');
+      bmBtn.className = 'crpb-sidecar-action';
+      bmBtn.textContent = 'Bookmark';
+      bmBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!lastSelection || Date.now() - lastSelection.timestamp > 10000) return;
+        createBookmark(lastSelection, 'bookmark');
+        hideSidecarBtns();
+      });
+      sidecarBtnContainer.appendChild(bmBtn);
+    }
 
     for (const { label, prefix } of SIDECAR_PROMPTS) {
       const btn = document.createElement('button');
@@ -338,6 +371,14 @@
     }, 80);
   }
 
+  function injectAndFill(text) {
+    const input = findInput();
+    if (!input) return;
+    input.focus();
+    document.execCommand('selectAll', false, null);
+    document.execCommand('insertText', false, text);
+  }
+
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.action === 'sidecar-receive') {
       injectAndSubmit(msg.text);
@@ -364,7 +405,7 @@
 
   const pendingBookmarks = [];
 
-  function createBookmark(selection) {
+  function createBookmark(selection, type = 'bookmark') {
     const title = selection.text.length > TITLE_LENGTH
       ? selection.text.slice(0, TITLE_LENGTH).trimEnd() + '…'
       : selection.text;
@@ -379,6 +420,7 @@
     const bookmark = {
       id: nextId++,
       title,
+      type,
       anchorA: { element: el, range: selection.range },
       scrollContainer: container,
       scrollB,
@@ -494,7 +536,11 @@
 
       const titleBtn = document.createElement('button');
       titleBtn.className = 'crpb-title-btn';
-      titleBtn.textContent = bm.title;
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'crpb-bm-icon ' + (bm.type === 'reply' ? 'crpb-bm-icon-reply' : 'crpb-bm-icon-mark');
+      iconSpan.textContent = bm.type === 'reply' ? '↩' : '◈';
+      titleBtn.appendChild(iconSpan);
+      titleBtn.appendChild(document.createTextNode(bm.title));
       titleBtn.title = 'Jump to where you were reading';
       titleBtn.addEventListener('click', () => jumpToA(bm));
 
