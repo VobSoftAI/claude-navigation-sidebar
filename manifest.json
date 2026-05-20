@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Claude Navigation Sidebar",
-  "version": "0.1.0",
-  "description": "Sidebar that bookmarks your reading position in Claude.ai conversations so you can jump back to where you were.",
+  "version": "0.2.0",
+  "description": "Sidebar that bookmarks your reading position and dispatches selections to a sidecar tab.",
+  "permissions": ["tabs", "storage"],
   "content_scripts": [
     {
       "matches": ["https://claude.ai/*", "https://gemini.google.com/*"],
@@ -10,5 +11,8 @@
       "css": ["sidebar.css"],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }

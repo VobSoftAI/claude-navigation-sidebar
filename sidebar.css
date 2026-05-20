@@ -31,7 +31,8 @@
 
 #crpb-sidebar.crpb-collapsed .crpb-list,
 #crpb-sidebar.crpb-collapsed .crpb-empty,
-#crpb-sidebar.crpb-collapsed .crpb-title {
+#crpb-sidebar.crpb-collapsed .crpb-title,
+#crpb-sidebar.crpb-collapsed .crpb-clear-btn {
   display: none;
 }
 
@@ -49,6 +50,26 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: #6a625a;
+}
+
+.crpb-clear-btn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #b0a89e;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0;
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+.crpb-clear-btn:hover {
+  background: rgba(200, 60, 60, 0.08);
+  color: #c0392b;
 }
 
 .crpb-toggle {
@@ -212,6 +233,90 @@
   100% { opacity: 0; }
 }
 
+/* ── Sidecar toggle button in header ──────────────────────────────── */
+
+.crpb-sidecar-toggle {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #888;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 5px;
+  margin-left: auto;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.crpb-sidecar-toggle:hover {
+  color: #4a7c59;
+  background: rgba(74, 124, 89, 0.08);
+}
+
+.crpb-sidecar-toggle.crpb-sidecar-active {
+  color: #4a7c59;
+  background: rgba(74, 124, 89, 0.12);
+  border-color: rgba(74, 124, 89, 0.3);
+}
+
+/* ── Floating sidecar action buttons on text selection ─────────────── */
+
+.crpb-sidecar-btns {
+  display: none;
+  position: fixed;
+  z-index: 10001;
+  gap: 4px;
+  background: rgba(252, 250, 245, 0.97);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-radius: 6px;
+  padding: 4px 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(6px);
+}
+
+.crpb-sidecar-btns.crpb-sidecar-visible {
+  display: flex;
+}
+
+.crpb-sidecar-action {
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  color: #2a2722;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 3px 8px;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.crpb-sidecar-action:hover {
+  background: rgba(74, 124, 89, 0.12);
+  color: #4a7c59;
+  border-color: rgba(74, 124, 89, 0.3);
+}
+
+/* ── Feedback toast ─────────────────────────────────────────────────── */
+
+.crpb-sidecar-feedback {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10002;
+  background: #2a2722;
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  animation: crpb-fadein 0.15s ease;
+}
+
+@keyframes crpb-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Dark mode (claude.ai's dark theme uses prefers-color-scheme) */
 @media (prefers-color-scheme: dark) {
   #crpb-sidebar {
@@ -221,6 +326,8 @@
   }
   .crpb-title { color: #a39c92; }
   .crpb-empty { color: #8a8278; }
+  .crpb-clear-btn { color: #6a625a; }
+  .crpb-clear-btn:hover { background: rgba(200, 60, 60, 0.15); color: #e05c4a; }
   .crpb-toggle:hover { background: rgba(255, 255, 255, 0.06); }
   .crpb-toggle::before { border-color: #a39c92; }
   .crpb-item { border-color: rgba(255, 255, 255, 0.05); }

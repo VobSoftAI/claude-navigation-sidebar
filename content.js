@@ -68,6 +68,7 @@
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
       if (SITE === 'gemini') hideFloatBtn();
+      hideSidecarBtns();
       return;
     }
     const text = sel.toString().trim();
@@ -80,6 +81,7 @@
       const assistantTurn = closestMatching(range.startContainer, SEL.ASSISTANT_TURN);
       if (!assistantTurn) return;
       lastSelection = { text, range: range.cloneRange(), assistantTurn, timestamp: Date.now() };
+      showSidecarBtns(lastSelection.range);
     } else {
       // On Gemini, accept any selection — model-response may sit behind a shadow
       // root and won't be reachable via closestMatching. Fall back to the nearest
@@ -89,6 +91,7 @@
           ? range.startContainer.parentElement
           : range.startContainer);
       lastSelection = { text, range: range.cloneRange(), assistantTurn, timestamp: Date.now() };
+      showSidecarBtns(lastSelection.range);
     }
   });
 
@@ -168,13 +171,178 @@
       }
       showFloatBtn(lastSelection.range);
     });
+  }
 
-    document.addEventListener('mousedown', (e) => {
-      // Don't hide if the user clicked the float button itself.
+  document.addEventListener('mousedown', (e) => {
+    if (sidecarBtnContainer && !sidecarBtnContainer.contains(e.target)) hideSidecarBtns();
+    if (SITE === 'gemini') {
       if (floatBtn && floatBtn.contains(e.target)) return;
       hideFloatBtn();
-    });
+    }
+  });
+
+  // ────────────────────────────────────────────────────────────────────
+  // SIDECAR SEND — floating action buttons on selection
+  // ────────────────────────────────────────────────────────────────────
+
+  const SIDECAR_PROMPTS = [
+    { label: 'Explain', prefix: 'Please explain this:\n\n' },
+    { label: 'Define',  prefix: 'Please define this term or concept:\n\n' },
+    { label: 'Search',  prefix: 'Please search and summarize information about:\n\n' },
+  ];
+
+  let sidecarBtnContainer = null;
+  let isReceiver = false;
+
+  function ensureSidecarBtns() {
+    if (sidecarBtnContainer) return sidecarBtnContainer;
+    sidecarBtnContainer = document.createElement('div');
+    sidecarBtnContainer.className = 'crpb-sidecar-btns';
+
+    for (const { label, prefix } of SIDECAR_PROMPTS) {
+      const btn = document.createElement('button');
+      btn.className = 'crpb-sidecar-action';
+      btn.textContent = label;
+      btn.dataset.prefix = prefix;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!lastSelection || Date.now() - lastSelection.timestamp > 10000) return;
+        const text = btn.dataset.prefix + lastSelection.text;
+        chrome.runtime.sendMessage({ action: 'sidecar-send', text }, (resp) => {
+          if (!resp || resp.count === 0) {
+            showSidecarFeedback('No sidecar tab registered');
+          }
+        });
+        hideSidecarBtns();
+      });
+      sidecarBtnContainer.appendChild(btn);
+    }
+    document.body.appendChild(sidecarBtnContainer);
+    return sidecarBtnContainer;
   }
+
+  function showSidecarBtns(range) {
+    if (isReceiver) return;
+    const container = ensureSidecarBtns();
+    if (SITE === 'claude') {
+      _positionSidecarVsTooltip(container, range);
+    } else {
+      const rect = range.getBoundingClientRect();
+      container.style.top  = Math.max(8, rect.top - 46) + 'px';
+      container.style.left = Math.min(rect.left, window.innerWidth - 200) + 'px';
+      container.classList.add('crpb-sidecar-visible');
+    }
+  }
+
+  function _positionNextToTooltip(container, tooltip) {
+    const rect = tooltip.getBoundingClientRect();
+    const left = Math.min(rect.right + 6, window.innerWidth - 200 - 8);
+    container.style.top  = rect.top + 'px';
+    container.style.left = left + 'px';
+    container.classList.add('crpb-sidecar-visible');
+  }
+
+  function _positionSidecarVsTooltip(container, range) {
+    // The Reply tooltip is injected asynchronously by Claude's code.
+    const tooltip = document.querySelector('[data-selection-tooltip="true"]');
+    if (tooltip) {
+      _positionNextToTooltip(container, tooltip);
+      return;
+    }
+    let obs = null;
+    let fallback = null;
+    function cleanup() {
+      if (obs) { obs.disconnect(); obs = null; }
+      if (fallback) { clearTimeout(fallback); fallback = null; }
+    }
+    obs = new MutationObserver(() => {
+      const tt = document.querySelector('[data-selection-tooltip="true"]');
+      if (tt) { cleanup(); _positionNextToTooltip(container, tt); }
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+    // Fallback: if tooltip never appears, position above the selection.
+    fallback = setTimeout(() => {
+      cleanup();
+      if (container.classList.contains('crpb-sidecar-visible')) return;
+      const rect = range.getBoundingClientRect();
+      container.style.top  = Math.max(8, rect.top - 46) + 'px';
+      container.style.left = Math.min(rect.left, window.innerWidth - 200) + 'px';
+      container.classList.add('crpb-sidecar-visible');
+    }, 500);
+  }
+
+  function hideSidecarBtns() {
+    if (sidecarBtnContainer) sidecarBtnContainer.classList.remove('crpb-sidecar-visible');
+  }
+
+  function showSidecarFeedback(msg) {
+    const fb = document.createElement('div');
+    fb.className = 'crpb-sidecar-feedback';
+    fb.textContent = msg;
+    document.body.appendChild(fb);
+    setTimeout(() => fb.remove(), 2500);
+  }
+
+  // ────────────────────────────────────────────────────────────────────
+  // RECEIVER — accept incoming sidecar text and inject into input box
+  // ────────────────────────────────────────────────────────────────────
+
+  const INPUT_SELECTORS = [
+    'div[contenteditable="true"].ProseMirror',
+    'fieldset div[contenteditable="true"]',
+    'div[contenteditable="true"]',
+    'textarea',
+  ];
+
+  const SUBMIT_SELECTORS = [
+    'button[aria-label="Send message"]',
+    'button[aria-label*="Send" i]',
+    'button[type="submit"]',
+  ];
+
+  function findInput() {
+    for (const sel of INPUT_SELECTORS) {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  function findSubmit() {
+    for (const sel of SUBMIT_SELECTORS) {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  function injectAndSubmit(text) {
+    const input = findInput();
+    if (!input) {
+      showSidecarFeedback('Could not find input box');
+      return;
+    }
+    input.focus();
+    document.execCommand('selectAll', false, null);
+    document.execCommand('insertText', false, text);
+    setTimeout(() => {
+      const submitBtn = findSubmit();
+      if (submitBtn) {
+        submitBtn.click();
+      } else {
+        input.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'Enter', code: 'Enter', keyCode: 13,
+          bubbles: true, cancelable: true,
+        }));
+      }
+    }, 80);
+  }
+
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.action === 'sidecar-receive') {
+      injectAndSubmit(msg.text);
+    }
+  });
 
   // ────────────────────────────────────────────────────────────────────
   // SCROLL UTILS
@@ -273,15 +441,38 @@
     sidebarRoot.innerHTML = `
       <div class="crpb-header">
         <span class="crpb-title">${SITE === 'claude' ? 'Reply tags' : 'Bookmarks'}</span>
+        <button class="crpb-sidecar-toggle" aria-label="Toggle sidecar receiver" title="Sidecar: receive lookups from other tabs">⊕</button>
+        <button class="crpb-clear-btn" aria-label="Clear all bookmarks" title="Clear all">×</button>
         <button class="crpb-toggle" aria-label="Collapse"></button>
       </div>
       <ul class="crpb-list" role="list"></ul>
       <div class="crpb-empty">No bookmarks yet. Select text in a response to bookmark your place.</div>
     `;
     document.body.appendChild(sidebarRoot);
+
+    // Sidecar toggle — register/unregister this tab as a receiver.
+    const sidecarToggle = sidebarRoot.querySelector('.crpb-sidecar-toggle');
+    chrome.runtime.sendMessage({ action: 'sidecar-status' }, (resp) => {
+      if (resp && resp.isReceiver) {
+        sidecarToggle.classList.add('crpb-sidecar-active');
+        isReceiver = true;
+      }
+    });
+    sidecarToggle.addEventListener('click', () => {
+      const active = sidecarToggle.classList.toggle('crpb-sidecar-active');
+      isReceiver = active;
+      chrome.runtime.sendMessage({
+        action: active ? 'sidecar-register' : 'sidecar-unregister',
+      });
+    });
+
     sidebarRoot.querySelector('.crpb-toggle').addEventListener('click', () => {
       collapsed = !collapsed;
       sidebarRoot.classList.toggle('crpb-collapsed', collapsed);
+    });
+    sidebarRoot.querySelector('.crpb-clear-btn').addEventListener('click', () => {
+      bookmarks.length = 0;
+      renderSidebar();
     });
   }
 
