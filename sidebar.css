@@ -227,16 +227,32 @@
 
 .crpb-float-btn:hover { background: #3d3730; }
 
-/* Bookmark type icon in sidebar list */
+/* Bookmark type badge in sidebar list */
 .crpb-bm-icon {
-  font-size: 9px;
-  margin-right: 4px;
-  opacity: 0.75;
+  display: inline-block;
+  font-size: 10px;
+  font-style: normal;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-right: 5px;
   flex-shrink: 0;
+  vertical-align: middle;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
-.crpb-bm-icon-mark  { color: #4a7c59; }
-.crpb-bm-icon-reply { color: #4a6b9e; }
+.crpb-bm-icon-mark {
+  background: rgba(46, 125, 79, 0.13);
+  color: #1e6b3f;
+  border: 1px solid rgba(46, 125, 79, 0.28);
+}
+
+.crpb-bm-icon-reply {
+  background: rgba(45, 95, 166, 0.12);
+  color: #1e4f9e;
+  border: 1px solid rgba(45, 95, 166, 0.25);
+}
 
 /* Flash overlay when scrolling back to anchor A */
 .crpb-flash {
@@ -361,4 +377,6 @@
   .crpb-float-row { background: rgba(38, 35, 32, 0.97); border-color: rgba(255,255,255,0.08); }
   .crpb-float-btn { background: #e8e3db; color: #2a2722; }
   .crpb-float-btn:hover { background: #d4cec7; }
+  .crpb-bm-icon-mark  { background: rgba(74, 180, 110, 0.15); color: #5ecb84; border-color: rgba(74, 180, 110, 0.3); }
+  .crpb-bm-icon-reply { background: rgba(90, 145, 255, 0.15); color: #7aabff; border-color: rgba(90, 145, 255, 0.3); }
 }
