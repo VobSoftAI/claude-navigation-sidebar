@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Claude Navigation Sidebar",
+  "name": "Browser Chatbot Bookmark Sidebar",
   "version": "0.2.0",
-  "description": "Sidebar that bookmarks your reading position and dispatches selections to a sidecar tab.",
+  "description": "Bookmark your reading position in claude.ai and Gemini, jump back instantly, and dispatch selections to a sidecar tab for lookup.",
   "permissions": ["tabs", "storage"],
   "content_scripts": [
     {

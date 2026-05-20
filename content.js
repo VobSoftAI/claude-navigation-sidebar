@@ -430,12 +430,6 @@
     pendingBookmarks.push(bookmark);
     while (bookmarks.length > MAX_BOOKMARKS) bookmarks.pop();
     renderSidebar();
-
-    // Optional integration: notify ai-chat-capture if it's installed.
-    // The event is harmless if nothing is listening.
-    document.dispatchEvent(new CustomEvent('crpb-bookmark', {
-      detail: { text: selection.text, site: SITE },
-    }));
   }
 
   // ────────────────────────────────────────────────────────────────────
